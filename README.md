@@ -65,10 +65,11 @@ There are tests written for every component of ther wrapper. You can run these v
 
 ## TODO
 * Add `bewit` support
-* Add support for the `WWW-Authenticate` header
 * (FUTURE) Port to angular2
 
 ## Version
+### 0.2.0
+Add `WWW-Authenticate` support
 ### 0.1.2
 Make the server checking configurable via the config object
 ### 0.1.1

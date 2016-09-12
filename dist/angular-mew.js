@@ -26,7 +26,8 @@
             MISSING_ALGORITHM: "Hawk authentication is enabled but algorithm is missing.",
             HEADER_GENERATION: "Hawk header generation failed",
             RESPONSE_VALIDATION: "Hawk server response validation failed",
-            HAWK_UNAVAILABLE: "Hawk library isn't available"
+            HAWK_UNAVAILABLE: "Hawk library isn't available",
+            HAWK_AUTHENTICATION_REQUIRED: "Hawk authentication is required for the given url"
         });
 
 })(hawk);
@@ -93,7 +94,8 @@
     function hawkInterceptor($location, $log, $q, Hawk, HawkAlgorithms, HawkConfiguration, HawkErrors) {
         return {
             'request': request,
-            'response': response
+            'response': response,
+            'responseError': responseError
         };
 
         function getCredentials(config) {
@@ -178,6 +180,18 @@
             return config;
         }
 
+        function responseError(response) {
+            var status = response.status;
+            var header = response.headers('WWW-Authenticate');
+            if (status == 401 && typeof header !== 'undefined' && header === 'Hawk') {
+                return $q.reject({
+                    reason: HawkErrors.HAWK_AUTHENTICATION_REQUIRED,
+                    response: response
+                });
+            }
+            return response;
+        }
+
         function response(response) {
             var addedHawkConfig = false;
             if(typeof response.config.hawk === "undefined"){
@@ -238,8 +252,5 @@
         if (Hawk == null) {
             throw HawkErrors.HAWK_UNAVAILABLE;
         }
-        // HawkConfiguration.setEnabled(true);
-        // HawkConfiguration.setCredentials('dh37fgj492je', 'werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn');
-        // HawkConfiguration.setAlgorithm('sha256');
     }
 })();

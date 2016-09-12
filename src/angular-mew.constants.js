@@ -15,7 +15,8 @@
             MISSING_ALGORITHM: "Hawk authentication is enabled but algorithm is missing.",
             HEADER_GENERATION: "Hawk header generation failed",
             RESPONSE_VALIDATION: "Hawk server response validation failed",
-            HAWK_UNAVAILABLE: "Hawk library isn't available"
+            HAWK_UNAVAILABLE: "Hawk library isn't available",
+            HAWK_AUTHENTICATION_REQUIRED: "Hawk authentication is required for the given url"
         });
 
 })(hawk);

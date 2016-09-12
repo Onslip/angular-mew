@@ -20,10 +20,11 @@ describe("HawkInterceptor", function(){
         expect(localHttpProvider.interceptors).toContain('HawkInterceptor');
     });
     
-    it("should be contain 2 functions ('request', 'response')'", function () {
+    it("should contain 3 functions ('request', 'response', 'responseError')'", function () {
         var possibleFunctions = [
             'request',
-            'response'
+            'response',
+            'responseError'
         ];
         expect(Object.getOwnPropertyNames(HawkInterceptor).sort()).toEqual(possibleFunctions.sort());
     });
@@ -426,6 +427,98 @@ describe("HawkInterceptor", function(){
                     });
                 $rootScope.$apply();
             });
+        });
+    });
+    describe("responseError", function () {
+        var HawkConfiguration;
+        var Hawk;
+        var defaultConfig = {
+            method: 'GET',
+            url: 'http://www.some-url.com/test',
+            headers: {}
+        };
+        var $httpBackend;
+        var $http;
+        var $rootScope;
+        var $q;
+
+        function cloneObject(object){
+            return JSON.parse(JSON.stringify(object));
+        }
+
+        beforeEach(inject(function (_HawkConfiguration_, _Hawk_, _$httpBackend_, _$http_, _$rootScope_, _$q_) {
+            HawkConfiguration = _HawkConfiguration_;
+            Hawk = _Hawk_;
+            $httpBackend = _$httpBackend_;
+            $http = _$http_;
+            $rootScope = _$rootScope_;
+            $q = _$q_;
+        }));
+
+        it("should be called when the http request failed", function () {
+            spyOn(HawkInterceptor, 'responseError').and.callThrough();
+            $http(defaultConfig);
+            $httpBackend.expectGET(defaultConfig.url).respond(401, {});
+            $httpBackend.flush();
+            expect(HawkInterceptor.responseError).toHaveBeenCalled();
+        });
+
+        it("should return the original response if the status code is not 401", function () {
+            var response = {
+                status: 403,
+                headers: function (field) {
+                    return "";
+                }
+            };
+            expect(HawkInterceptor.responseError(response)).toEqual(response);
+        });
+
+        it("should return the original response if the status code is 401 but the 'WWW-Authenticate' header is not set", function () {
+            var response = {
+                status: 401,
+                headers: function (field) {
+                    if (field === 'WWW-Authenticate'){
+                        return null;
+                    }
+                    return "";
+                }
+            };
+            expect(HawkInterceptor.responseError(response)).toEqual(response);
+        });
+
+        it("should return the original response if the status code is 401 but the 'WWW-Authenticate' header is not set to 'Hawk'", function () {
+            var response = {
+                status: 401,
+                headers: function (field) {
+                    if (field === 'WWW-Authenticate'){
+                        return 'notHawk';
+                    }
+                    return "";
+                }
+            };
+            expect(HawkInterceptor.responseError(response)).toEqual(response);
+        });
+
+        it("should return a rejected promise when the status code is 401 and the 'WWW-Authenticate' header is set to 'Hawk'", function () {
+            var response = {
+                status: 401,
+                headers: function (field) {
+                    if (field === 'WWW-Authenticate'){
+                        return 'Hawk';
+                    }
+                    return "";
+                }
+            };
+            var interceptedResponse = HawkInterceptor.responseError(response);
+            interceptedResponse
+                .then(function () {
+                    //we should not get here!
+                    expect(true).toBe(false);
+                })
+                .catch(function (error) {
+                    expect(error.reason).toEqual(HawkErrors.HAWK_AUTHENTICATION_REQUIRED);
+                });
+            $rootScope.$apply();
         });
     });
 });

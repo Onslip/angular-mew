@@ -9,8 +9,5 @@
         if (Hawk == null) {
             throw HawkErrors.HAWK_UNAVAILABLE;
         }
-        // HawkConfiguration.setEnabled(true);
-        // HawkConfiguration.setCredentials('dh37fgj492je', 'werxhqb98rpaxn39848xrunpaw3489ruxnpa98w4rxn');
-        // HawkConfiguration.setAlgorithm('sha256');
     }
 })();

@@ -9,7 +9,8 @@
     function hawkInterceptor($location, $log, $q, Hawk, HawkAlgorithms, HawkConfiguration, HawkErrors) {
         return {
             'request': request,
-            'response': response
+            'response': response,
+            'responseError': responseError
         };
 
         function getCredentials(config) {
@@ -92,6 +93,18 @@
             config.headers.Authorization = header.field;
             config.hawk.artifacts = header.artifacts;
             return config;
+        }
+
+        function responseError(response) {
+            var status = response.status;
+            var header = response.headers('WWW-Authenticate');
+            if (status == 401 && typeof header !== 'undefined' && header === 'Hawk') {
+                return $q.reject({
+                    reason: HawkErrors.HAWK_AUTHENTICATION_REQUIRED,
+                    response: response
+                });
+            }
+            return response;
         }
 
         function response(response) {

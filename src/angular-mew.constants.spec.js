@@ -28,7 +28,8 @@ describe("angular-mew", function(){
             'MISSING_ALGORITHM',
             'HEADER_GENERATION',
             'RESPONSE_VALIDATION',
-            'HAWK_UNAVAILABLE'
+            'HAWK_UNAVAILABLE',
+            'HAWK_AUTHENTICATION_REQUIRED'
         ];
         expect(HawkErrors).toBeDefined();
         expect(Object.getOwnPropertyNames(HawkErrors).sort()).toEqual(possibleErrors.sort());
