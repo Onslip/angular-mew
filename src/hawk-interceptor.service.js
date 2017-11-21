@@ -126,14 +126,12 @@
                 return response;
             }
             $log.debug('intercepting http response');
-            // Add getResponseHeader as an alternative for the headers function (Hawk uses this function)
-            response.getResponseHeader = response.headers;
             var options = { required: hawkSettings.checkServerAuthorization === true };
             var header = response.headers('Server-Authorization');
             if (typeof response.data !== 'undefined' && header.indexOf('hash="')> -1){
                 options.payload = response.data;
             }
-            var isValid = Hawk.client.authenticate(response, getCredentials(response.config), response.config.hawk.artifacts, options);
+            var isValid = Hawk.client.authenticate({ getResponseHeader: response.headers }, getCredentials(response.config), response.config.hawk.artifacts, options);
             if (!isValid) {
                 return $q.reject({
                     reason: HawkErrors.RESPONSE_VALIDATION,
