@@ -127,10 +127,6 @@
             }
             $log.debug('intercepting http response');
             var options = { required: hawkSettings.checkServerAuthorization === true };
-            var header = response.headers('Server-Authorization');
-            if (typeof response.data !== 'undefined' && header.indexOf('hash="')> -1){
-                options.payload = response.data;
-            }
             var isValid = Hawk.client.authenticate({ getResponseHeader: response.headers }, getCredentials(response.config), response.config.hawk.artifacts, options);
             if (!isValid) {
                 return $q.reject({
