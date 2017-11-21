@@ -119,7 +119,7 @@
                 hawkSettings.checkServerAuthorization = response.config.hawk.checkServerAuthorization;
             }
 
-            if (isDisabled(response.config) || !hawkSettings.checkServerAuthorization) {
+            if (isDisabled(response.config) || hawkSettings.checkServerAuthorization === false) {
                 if (addedHawkConfig){
                     delete response.config.hawk;
                 }
@@ -128,7 +128,7 @@
             $log.debug('intercepting http response');
             // Add getResponseHeader as an alternative for the headers function (Hawk uses this function)
             response.getResponseHeader = response.headers;
-            var options = {};
+            var options = { required: hawkSettings.checkServerAuthorization === true };
             var header = response.headers('Server-Authorization');
             if (typeof response.data !== 'undefined' && header.indexOf('hash="')> -1){
                 options.payload = response.data;
